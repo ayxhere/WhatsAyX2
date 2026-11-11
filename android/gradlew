@@ -143,6 +143,12 @@ if "$cygwin" || "$msys" ; then
     done
 fi
 
+# Save the Gradle task arguments first: the eval below replaces $@ with
+# JVM options, and without this the task name (assembleDebug) would be lost
+# and the -Xmx/-Xms JVM flags would reach Gradle as CLI args ("Unknown
+# command-line option '-X'").
+GRADLE_ARGS="$*"
+
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 eval "set -- $(
         printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
@@ -151,4 +157,4 @@ eval "set -- $(
         tr '\n' ' '
     )"
 
-exec "$JAVACMD" "$@" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
+exec "$JAVACMD" "$@" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain $GRADLE_ARGS
