@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../models/chat.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ayx_widgets.dart';
 import 'chat_detail_screen.dart';
+import 'new_chat_screen.dart';
 
 /// Chats tab (WZH-style): a clear search bar, a Connect card when
 /// offline, then clean chat rows with lots of breathing room.
@@ -16,30 +18,132 @@ class ChatsScreen extends StatefulWidget {
 
 class _ChatsScreenState extends State<ChatsScreen> {
   final _searchCtrl = TextEditingController();
+  final ApiService _api = ApiService();
   String _query = '';
+  final Set<String> _hiddenIds = {};
+  bool _showHidden = false;
 
   @override
   void dispose() {
     _searchCtrl.dispose();
+    _api.dispose();
     super.dispose();
   }
 
   List<ChatThread> get _filtered {
-    if (_query.isEmpty) return DemoData.chats;
+    var list = DemoData.chats;
+    // Hidden chats: long-press a row to hide; double-tap the
+    // "WhatsAyX" title to reveal them (same as the original).
+    if (!_showHidden) {
+      list = list.where((c) => !_hiddenIds.contains(c.id)).toList();
+    } else {
+      list = list.where((c) => _hiddenIds.contains(c.id)).toList();
+    }
+    if (_query.isEmpty) return list;
     final q = _query.toLowerCase();
-    return DemoData.chats
+    return list
         .where((c) =>
             c.name.toLowerCase().contains(q) ||
             c.lastMessage.toLowerCase().contains(q))
         .toList();
   }
 
+  Future<void> _chatMenu(ChatThread chat) async {
+    final hidden = _hiddenIds.contains(chat.id);
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.volume_off),
+              title: const Text('Mute',
+                  style: TextStyle(color: AppTheme.text)),
+              onTap: () => Navigator.of(ctx).pop('mute'),
+            ),
+            ListTile(
+              leading: Icon(hidden ? Icons.visibility : Icons.visibility_off),
+              title: Text(hidden ? 'Unhide chat' : 'Hide chat',
+                  style: const TextStyle(color: AppTheme.text)),
+              onTap: () => Navigator.of(ctx).pop('hide'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.mark_chat_read),
+              title: const Text('Mark as read',
+                  style: TextStyle(color: AppTheme.text)),
+              onTap: () => Navigator.of(ctx).pop('read'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: AppTheme.danger),
+              title: const Text('Delete chat',
+                  style: TextStyle(color: AppTheme.danger)),
+              onTap: () => Navigator.of(ctx).pop('delete'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.block, color: AppTheme.danger),
+              title: const Text('Block',
+                  style: TextStyle(color: AppTheme.danger)),
+              onTap: () => Navigator.of(ctx).pop('block'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (action == null || !mounted) return;
+    switch (action) {
+      case 'hide':
+        setState(() {
+          if (hidden) {
+            _hiddenIds.remove(chat.id);
+          } else {
+            _hiddenIds.add(chat.id);
+          }
+        });
+        break;
+      case 'read':
+        await _api.markRead(chat.id);
+        break;
+      case 'delete':
+        await _api.deleteChat(chat.id);
+        break;
+      case 'block':
+        await _api.blockChat(chat.id);
+        break;
+      case 'mute':
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${chat.name} muted.')),
+        );
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final chats = _filtered;
     return Scaffold(
-      appBar: AyxAppBar(
-        title: 'WhatsAyX',
+      appBar: AppBar(
+        backgroundColor: AppTheme.bg,
+        title: GestureDetector(
+          onDoubleTap: () {
+            // Double-tap the title reveals hidden chats (original behavior).
+            setState(() => _showHidden = !_showHidden);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  _showHidden
+                      ? 'Hidden chats shown'
+                      : 'Hidden chats hidden',
+                ),
+              ),
+            );
+          },
+          child: Text(_showHidden ? 'Hidden chats' : 'WhatsAyX'),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.qr_code_scanner),
@@ -98,6 +202,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                             ),
                           );
                         },
+                        onLongPress: () => _chatMenu(chat),
                       );
                     },
                   ),
@@ -108,8 +213,10 @@ class _ChatsScreenState extends State<ChatsScreen> {
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.black,
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('New chat — coming in the next update.')),
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const NewChatScreen(),
+            ),
           );
         },
         child: const Icon(Icons.chat),
@@ -119,15 +226,21 @@ class _ChatsScreenState extends State<ChatsScreen> {
 }
 
 class _ChatRow extends StatelessWidget {
-  const _ChatRow({required this.chat, required this.onTap});
+  const _ChatRow({
+    required this.chat,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   final ChatThread chat;
   final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         child: Row(
