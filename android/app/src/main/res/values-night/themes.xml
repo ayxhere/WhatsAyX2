@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Night variant of AppTheme. Same platform parent as values/themes.xml. -->
+    <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/ayx_bg</item>
+    </style>
+
+    <style name="LaunchTheme" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+
+    <style name="NormalTheme" parent="AppTheme">
+        <item name="android:windowBackground">@color/ayx_bg</item>
+    </style>
+</resources>
