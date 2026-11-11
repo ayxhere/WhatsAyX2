@@ -1,8 +1,30 @@
 import 'package:flutter/material.dart';
 
+import '../services/api_service.dart';
+import '../services/settings_store.dart';
 import '../theme/app_theme.dart';
+import 'settings/settings_about.dart';
+import 'settings/settings_ai.dart';
+import 'settings/settings_ai_memory.dart';
+import 'settings/settings_appearance.dart';
+import 'settings/settings_autoreply.dart';
+import 'settings/settings_broadcast.dart';
+import 'settings/settings_chat.dart';
+import 'settings/settings_general.dart';
+import 'settings/settings_home.dart';
+import 'settings/settings_support.dart';
+import 'settings/settings_sync.dart';
+import 'settings/settings_voice.dart';
 
-/// Settings tab: profile card + clean grouped rows.
+/// Settings tab: full navigator with the SAME page structure as the
+/// original AyXWhatsapp (same page ids, same titles, same parent chain).
+///
+/// Pages: home, general, autoreply, ai, imageai, aimemory, voice, chat,
+/// wallpaper, appearance, accent, bluranim, textanim, msgmotion, iconstyle,
+/// font, emoji, sync, broadcast, about, support.
+/// Nested pages live inside their parent page in v2 (e.g. Image AI is a
+/// group inside AI Assistant; Font/Emoji/Accent live inside Appearance),
+/// so their ids route to the parent page.
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -11,217 +33,173 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _notifications = true;
-  bool _autoDownload = false;
-  bool _readReceipts = true;
+  String _page = 'home';
+  late final ApiService _api;
+  late final SettingsStore _store;
+  bool _loaded = false;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: AppTheme.bg,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      'assets/icon/ayx-logo.png',
-                      width: 56,
-                      height: 56,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'WhatsAyX',
-                          style: TextStyle(
-                            color: AppTheme.text,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 3),
-                        Text(
-                          'v1.0.0  •  com.wa.ayx',
-                          style: TextStyle(color: AppTheme.textSecondary),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          const _SectionLabel('General'),
-          _Row(
-            icon: Icons.notifications_outlined,
-            title: 'Notifications',
-            subtitle: 'Message and status alerts',
-            trailing: Switch(
-              value: _notifications,
-              activeColor: AppTheme.primary,
-              onChanged: (v) => setState(() => _notifications = v),
-            ),
-          ),
-          _Row(
-            icon: Icons.download_outlined,
-            title: 'Auto-download media',
-            subtitle: 'Photos and videos on Wi-Fi',
-            trailing: Switch(
-              value: _autoDownload,
-              activeColor: AppTheme.primary,
-              onChanged: (v) => setState(() => _autoDownload = v),
-            ),
-          ),
-          _Row(
-            icon: Icons.done_all,
-            title: 'Read receipts',
-            subtitle: 'Let others see when you read',
-            trailing: Switch(
-              value: _readReceipts,
-              activeColor: AppTheme.primary,
-              onChanged: (v) => setState(() => _readReceipts = v),
-            ),
-          ),
-          const SizedBox(height: 20),
-          const _SectionLabel('App'),
-          _Row(
-            icon: Icons.storage_outlined,
-            title: 'Storage',
-            subtitle: 'Manage media and cache',
-            onTap: () {},
-          ),
-          _Row(
-            icon: Icons.shield_outlined,
-            title: 'Privacy',
-            subtitle: 'Blocked contacts, disappearing messages',
-            onTap: () {},
-          ),
-          _Row(
-            icon: Icons.info_outline,
-            title: 'About',
-            subtitle: 'WhatsAyX v2 — a separate app from AyXWhatsapp',
-            onTap: () {},
-          ),
-          const SizedBox(height: 20),
-          const _SectionLabel('Account'),
-          _Row(
-            icon: Icons.logout,
-            title: 'Log out',
-            subtitle: 'Unlink this WhatsApp account',
-            titleColor: AppTheme.danger,
-            onTap: () {
-              Navigator.of(context).pushReplacementNamed('/login');
-            },
-          ),
-          const SizedBox(height: 32),
-          const Center(
-            child: Text(
-              'WhatsAyX v2 • Flutter + Node • Made by imayx',
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
+  void initState() {
+    super.initState();
+    _api = ApiService();
+    _store = SettingsStore(api: _api);
+    _store.addListener((_) {
+      if (mounted) setState(() {});
+    });
+    _store.load().then((_) {
+      if (mounted) setState(() => _loaded = true);
+    });
   }
-}
 
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
+  @override
+  void dispose() {
+    _api.dispose();
+    super.dispose();
+  }
 
-  final String text;
+  String _title(String page) => switch (page) {
+        'general' => 'General',
+        'autoreply' => 'Auto-reply',
+        'ai' => 'AI Assistant',
+        'imageai' => 'Image AI',
+        'aimemory' => 'AI Memory',
+        'voice' => 'AI Voice',
+        'chat' => 'Chat Settings',
+        'wallpaper' => 'Chat Wallpaper',
+        'appearance' => 'Appearance',
+        'accent' => 'Accent Color',
+        'bluranim' => 'Blur & Animation',
+        'textanim' => 'Text Animation',
+        'msgmotion' => 'Message Motion',
+        'iconstyle' => 'Icon Style',
+        'font' => 'App font',
+        'emoji' => 'Emoji',
+        'sync' => 'Sync',
+        'broadcast' => 'Broadcast',
+        'about' => 'About',
+        'support' => 'Support Development',
+        _ => 'Settings',
+      };
+
+  /// Parent page for nested back — same chain as the original.
+  String _parent(String page) => switch (page) {
+        'wallpaper' => 'chat',
+        'imageai' => 'ai',
+        'aimemory' => 'ai',
+        'voice' => 'ai',
+        'font' => 'appearance',
+        'emoji' => 'appearance',
+        'textanim' => 'appearance',
+        'msgmotion' => 'appearance',
+        'iconstyle' => 'appearance',
+        'accent' => 'appearance',
+        'bluranim' => 'appearance',
+        _ => 'home',
+      };
+
+  void _open(String page) => setState(() => _page = page);
+
+  bool _goBack() {
+    if (_page == 'home') return false;
+    setState(() => _page = _parent(_page));
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: AppTheme.textSecondary,
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
+    final isHome = _page == 'home';
+    return PopScope(
+      canPop: isHome,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _goBack();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_title(_page)),
+          backgroundColor: AppTheme.bg,
+          leading: isHome
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _goBack,
+                ),
+        ),
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.02, 0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            ),
+          ),
+          child: _buildPage(),
         ),
       ),
     );
   }
-}
 
-class _Row extends StatelessWidget {
-  const _Row({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    this.trailing,
-    this.onTap,
-    this.titleColor,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Widget? trailing;
-  final VoidCallback? onTap;
-  final Color? titleColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Icon(icon, color: titleColor ?? AppTheme.primary, size: 24),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: titleColor ?? AppTheme.text,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(color: AppTheme.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-              if (trailing != null) trailing!,
-              if (trailing == null && onTap != null)
-                const Icon(
-                  Icons.chevron_right,
-                  color: AppTheme.textSecondary,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
+  Widget _buildPage() {
+    if (!_loaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    switch (_page) {
+      case 'general':
+        return GeneralSettingsPage(key: const ValueKey('general'), store: _store);
+      case 'autoreply':
+        return AutoReplyPage(key: const ValueKey('autoreply'), store: _store);
+      case 'ai':
+      case 'imageai':
+        return AiSettingsPage(
+          key: const ValueKey('ai'),
+          store: _store,
+          api: _api,
+          onOpenMemory: () => _open('aimemory'),
+          onOpenVoice: () => _open('voice'),
+        );
+      case 'aimemory':
+        return AiMemoryPage(key: const ValueKey('aimemory'), api: _api);
+      case 'voice':
+        return VoiceSettingsPage(key: const ValueKey('voice'), store: _store);
+      case 'chat':
+      case 'wallpaper':
+        return ChatSettingsPage(key: const ValueKey('chat'), store: _store);
+      case 'appearance':
+      case 'accent':
+      case 'bluranim':
+      case 'textanim':
+      case 'msgmotion':
+      case 'iconstyle':
+      case 'font':
+      case 'emoji':
+        return AppearanceSettingsPage(
+          key: const ValueKey('appearance'),
+          store: _store,
+        );
+      case 'sync':
+        return SyncSettingsPage(
+          key: const ValueKey('sync'),
+          api: _api,
+        );
+      case 'broadcast':
+        return BroadcastPage(key: const ValueKey('broadcast'), api: _api);
+      case 'about':
+        return AboutSettingsPage(
+          key: const ValueKey('about'),
+          store: _store,
+          api: _api,
+        );
+      case 'support':
+        return const SupportSettingsPage(key: ValueKey('support'));
+      default:
+        return SettingsHomePage(
+          key: const ValueKey('home'),
+          api: _api,
+          onOpen: _open,
+        );
+    }
   }
 }
