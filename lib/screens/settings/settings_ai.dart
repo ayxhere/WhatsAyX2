@@ -185,7 +185,7 @@ class _AiSettingsPageState extends State<AiSettingsPage> {
                   onPressed: () async {
                     await _update(
                         s.copyWith(aiReplyLang: _langCtrl.text.trim()));
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Language saved')),
                       );
@@ -308,7 +308,7 @@ class _AiSettingsPageState extends State<AiSettingsPage> {
                       aiModel: _apiModelCtrl.text.trim(),
                       aiSystemPrompt: _sysCtrl.text.trim(),
                     ));
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('API settings saved')),
                       );
@@ -323,7 +323,7 @@ class _AiSettingsPageState extends State<AiSettingsPage> {
                 child: OutlinedButton(
                   onPressed: () async {
                     final ok = await widget.api.health();
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
@@ -384,7 +384,7 @@ class _AiSettingsPageState extends State<AiSettingsPage> {
                       aiVisionApiKey: _visionKeyCtrl.text.trim(),
                       aiVisionModel: _visionModelCtrl.text.trim(),
                     ));
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text('Vision settings saved')),

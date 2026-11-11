@@ -129,12 +129,14 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         break;
       case 'forward':
         await _api.forwardMessage(widget.chat.id, m.id, []);
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pick chats to forward to.')),
         );
         break;
       case 'react':
         await _api.react(widget.chat.id, m.id, '❤️');
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Reacted ❤️')),
         );

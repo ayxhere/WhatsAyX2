@@ -78,7 +78,7 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
                   );
                   if (email != null && email.isNotEmpty) {
                     setState(() => _account = email);
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(

@@ -79,7 +79,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 labels: {for (final v in AyxOptions.ttsVoices) v: v},
                 onPick: (v) async {
                   await _update(s.copyWith(aiTtsVoice: v));
-                  if (mounted) {
+                  if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Voice set')),
                     );
@@ -125,7 +125,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                   onPressed: () async {
                     await _update(
                         s.copyWith(aiSarvamKey: _sarvamCtrl.text.trim()));
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Sarvam key saved')),
                       );

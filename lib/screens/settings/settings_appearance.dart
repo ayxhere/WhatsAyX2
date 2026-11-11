@@ -215,7 +215,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                 onSubmitted: (v) async {
                   await _update(s.copyWith(
                       translateLang: v.trim().isEmpty ? 'English' : v.trim()));
-                  if (mounted) {
+                  if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                           content: Text('Translate language saved')),

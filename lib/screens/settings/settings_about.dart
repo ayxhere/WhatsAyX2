@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../services/api_service.dart';
 import '../../services/settings_store.dart';
@@ -72,7 +71,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                 ],
               ),
               const SizedBox(height: 12),
-              Text(
+              const Text(
                 'Version $_version',
                 style: const TextStyle(color: AppTheme.textSecondary),
               ),

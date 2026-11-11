@@ -76,7 +76,7 @@ Rules: phone = country code + number, no + or spaces. One object per line.
                       onPressed: () async {
                         await Clipboard.setData(
                             const ClipboardData(text: _aiPrompt));
-                        if (mounted) {
+                        if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Prompt copied!')),
                           );

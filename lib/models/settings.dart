@@ -8,6 +8,7 @@
 ///
 /// Keys are kept IDENTICAL to the original so the gateway JSON and the
 /// local store stay interchangeable.
+library;
 
 /// One auto-reply keyword rule (original: `autoReplyRules`).
 class AutoReplyRule {
