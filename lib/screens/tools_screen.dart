@@ -119,7 +119,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: tool.color.withValues(alpha: 0.14),
+                        color: tool.color.withOpacity(0.14),
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Icon(tool.icon, color: tool.color, size: 25),
@@ -249,7 +249,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: tool.color.withValues(alpha: 0.14),
+                      color: tool.color.withOpacity(0.14),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(tool.icon, color: tool.color, size: 24),

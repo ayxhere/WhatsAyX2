@@ -22,11 +22,9 @@ class AppTheme {
       primary: primary,
       secondary: secondary,
       surface: surface,
-      surface: bg,
       onPrimary: Colors.black,
       onSecondary: Colors.black,
       onSurface: text,
-      onBackground: text,
     );
     return ThemeData(
       useMaterial3: true,
@@ -44,7 +42,7 @@ class AppTheme {
         ),
         iconTheme: IconThemeData(color: text),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: surface,
         elevation: 0,
         shape: RoundedRectangleBorder(

@@ -158,7 +158,7 @@ class _StatusRow extends StatelessWidget {
               ),
               child: CircleAvatar(
                 radius: 26,
-                backgroundColor: Color(item.avatarColor).withValues(alpha: 0.2),
+                backgroundColor: Color(item.avatarColor).withOpacity(0.2),
                 child: Text(
                   item.name.isNotEmpty ? item.name[0] : '?',
                   style: TextStyle(
@@ -319,7 +319,7 @@ class _StatusViewerState extends State<_StatusViewer>
                 CircleAvatar(
                   radius: 20,
                   backgroundColor:
-                      Color(widget.item.avatarColor).withValues(alpha: 0.2),
+                      Color(widget.item.avatarColor).withOpacity(0.2),
                   child: Text(
                     widget.item.name.isNotEmpty ? widget.item.name[0] : '?',
                     style: TextStyle(

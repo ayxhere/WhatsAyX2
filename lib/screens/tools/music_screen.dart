@@ -122,7 +122,7 @@ class _MusicScreenState extends State<MusicScreen> {
                           )
                         : ListView.separated(
                             itemCount: _results.length,
-                            separatorBuilder: (_, _) => const Divider(
+                            separatorBuilder: (_, __) => const Divider(
                               color: AppTheme.border,
                               height: 1,
                             ),
@@ -138,7 +138,7 @@ class _MusicScreenState extends State<MusicScreen> {
                                   height: 44,
                                   decoration: BoxDecoration(
                                     color: AppTheme.primary
-                                        .withValues(alpha: 0.14),
+                                        .withOpacity(0.14),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: const Icon(

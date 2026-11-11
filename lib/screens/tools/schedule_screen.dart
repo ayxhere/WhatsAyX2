@@ -98,7 +98,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: _statusColor(t.status)
-                                        .withValues(alpha: 0.14),
+                                        .withOpacity(0.14),
                                     borderRadius: BorderRadius.circular(999),
                                   ),
                                   child: Text(

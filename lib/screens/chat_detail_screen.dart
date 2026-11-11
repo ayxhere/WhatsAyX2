@@ -217,7 +217,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             CircleAvatar(
               radius: 20,
               backgroundColor:
-                  Color(widget.chat.avatarColor).withValues(alpha: 0.2),
+                  Color(widget.chat.avatarColor).withOpacity(0.2),
               child: Text(
                 widget.chat.name.isNotEmpty ? widget.chat.name[0] : '?',
                 style: TextStyle(

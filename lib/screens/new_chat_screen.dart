@@ -109,7 +109,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                       )
                     : ListView.separated(
                         itemCount: contacts.length,
-                        separatorBuilder: (_, _) => const Divider(
+                        separatorBuilder: (_, __) => const Divider(
                           color: AppTheme.border,
                           height: 1,
                         ),
@@ -121,7 +121,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           return ListTile(
                             leading: CircleAvatar(
                               backgroundColor:
-                                  AppTheme.primary.withValues(alpha: 0.2),
+                                  AppTheme.primary.withOpacity(0.2),
                               child: Text(
                                 name.isNotEmpty ? name[0] : '?',
                                 style: const TextStyle(

@@ -108,7 +108,7 @@ class _AiMemoryPageState extends State<AiMemoryPage> {
                         CircleAvatar(
                           radius: 20,
                           backgroundColor:
-                              AppTheme.primary.withValues(alpha: 0.2),
+                              AppTheme.primary.withOpacity(0.2),
                           child: Text(
                             c.name.isNotEmpty ? c.name[0] : '?',
                             style: const TextStyle(

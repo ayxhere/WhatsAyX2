@@ -72,7 +72,7 @@ class AyxInfoCard extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.14),
+                  color: iconColor.withOpacity(0.14),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(icon, color: iconColor, size: 26),
@@ -120,7 +120,7 @@ class AyxStatusPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: (connected ? AppTheme.success : AppTheme.danger)
-            .withValues(alpha: 0.14),
+            .withOpacity(0.14),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(

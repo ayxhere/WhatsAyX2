@@ -68,7 +68,7 @@ class SettingRow extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: tint.withValues(alpha: 0.16),
+              color: tint.withOpacity(0.16),
               borderRadius: BorderRadius.circular(11),
             ),
             child: Icon(icon, color: tint, size: 20),
@@ -141,7 +141,7 @@ class ActionRow extends StatelessWidget {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: tint.withValues(alpha: 0.16),
+                color: tint.withOpacity(0.16),
                 borderRadius: BorderRadius.circular(11),
               ),
               child: Icon(icon, color: tint, size: 20),

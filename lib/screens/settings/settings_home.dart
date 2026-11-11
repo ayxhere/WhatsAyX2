@@ -234,7 +234,7 @@ class _PulseDotState extends State<_PulseDot>
                 height: 20,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: widget.color.withValues(alpha: a * 0.22),
+                  color: widget.color.withOpacity(a * 0.22),
                 ),
               ),
               Container(
@@ -242,7 +242,7 @@ class _PulseDotState extends State<_PulseDot>
                 height: 10,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: widget.color.withValues(alpha: a),
+                  color: widget.color.withOpacity(a),
                 ),
               ),
             ],
@@ -283,7 +283,7 @@ class _CategoryCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: tint.withValues(alpha: 0.16),
+                  color: tint.withOpacity(0.16),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: tint, size: 21),

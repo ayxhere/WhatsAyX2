@@ -65,7 +65,7 @@ class _ChatSettingsPageState extends State<ChatSettingsPage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 7),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.25),
+                      color: AppTheme.primary.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(
                           _bubbleRadius(s.bubbleStyle)),
                     ),

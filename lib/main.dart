@@ -38,8 +38,8 @@ class WhatsAyxApp extends StatelessWidget {
         }
         return PageRouteBuilder<void>(
           settings: settings,
-          pageBuilder: (_, _, _) => page,
-          transitionsBuilder: (_, animation, _, child) {
+          pageBuilder: (context, _, __) => page,
+          transitionsBuilder: (context, animation, __, child) {
             return FadeTransition(
               opacity: animation,
               child: SlideTransition(

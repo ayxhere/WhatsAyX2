@@ -189,7 +189,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                 : ListView.separated(
                     padding: const EdgeInsets.only(bottom: 16),
                     itemCount: chats.length,
-                    separatorBuilder: (_, _) =>
+                    separatorBuilder: (_, __) =>
                         const Divider(color: AppTheme.border, height: 1),
                     itemBuilder: (context, i) {
                       final chat = chats[i];
@@ -247,7 +247,7 @@ class _ChatRow extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 27,
-              backgroundColor: Color(chat.avatarColor).withValues(alpha: 0.2),
+              backgroundColor: Color(chat.avatarColor).withOpacity(0.2),
               child: Text(
                 chat.name.isNotEmpty ? chat.name[0] : '?',
                 style: TextStyle(
