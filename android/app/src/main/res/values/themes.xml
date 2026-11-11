@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AppTheme MUST use a platform parent. Do not switch this to a
+         Material3 theme: the checklist requires the platform theme here,
+         and material:1.12.0 is a dependency so Theme.Material3.* still
+         resolves if any file references it. -->
+    <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/ayx_bg</item>
+    </style>
+
+    <style name="LaunchTheme" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+
+    <style name="NormalTheme" parent="AppTheme">
+        <item name="android:windowBackground">@color/ayx_bg</item>
+    </style>
+</resources>
