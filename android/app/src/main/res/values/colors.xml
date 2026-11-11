@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ayx_bg">#1A1D24</color>
+    <color name="ayx_surface">#22262F</color>
+    <color name="ayx_primary">#4DD0C4</color>
+    <color name="ayx_text">#E8EAF0</color>
+</resources>
