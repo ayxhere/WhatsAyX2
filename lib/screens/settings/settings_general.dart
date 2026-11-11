@@ -200,11 +200,10 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
         ],
       ),
     );
-    if (yes == true && context.mounted) {
+    if (yes == true && mounted) {
       await widget.store.clearLocal();
-      if (context.mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
-      }
+      if (!mounted) return;
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
     }
   }
 
