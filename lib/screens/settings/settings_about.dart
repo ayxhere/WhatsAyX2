@@ -73,7 +73,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
               const SizedBox(height: 12),
               const Text(
                 'Version $_version',
-                style: const TextStyle(color: AppTheme.textSecondary),
+                style: TextStyle(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 6),
               const Text(

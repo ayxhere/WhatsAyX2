@@ -200,10 +200,11 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
         ],
       ),
     );
-    if (yes == true && mounted) {
+    if (yes == true && context.mounted) {
       await widget.store.clearLocal();
-      if (!mounted) return;
-      Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+      if (context.mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+      }
     }
   }
 
@@ -213,6 +214,8 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
   }
 
   void _snack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
   }
 }

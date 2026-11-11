@@ -284,11 +284,12 @@ class _StatusViewerState extends State<_StatusViewer>
     final text = _replyCtrl.text.trim();
     if (text.isEmpty) return;
     await _api.sendMessage(widget.item.id, text);
-    if (!mounted) return;
-    _replyCtrl.clear();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Reply sent to ${widget.item.name}.')),
-    );
+    if (context.mounted) {
+      _replyCtrl.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Reply sent to ${widget.item.name}.')),
+      );
+    }
   }
 
   @override
