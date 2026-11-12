@@ -248,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(
+            SizedBox(
               width: 8,
               height: 8,
               child: CircularProgressIndicator(
@@ -256,8 +256,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: AppTheme.primary,
               ),
             ),
-            const SizedBox(width: 8),
-            const Text(
+            SizedBox(width: 8),
+            Text(
               'Waiting for scan…',
               style: TextStyle(color: AppTheme.textSecondary),
             ),
