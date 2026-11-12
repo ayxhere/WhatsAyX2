@@ -19,11 +19,113 @@ jobs:
           distribution: zulu
           java-version: '17'
 
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Set up Flutter 3.24 (stable)
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.5'
           channel: stable
+
+      - name: Install NDK + CMake
+        run: |
+          set -e
+          yes | sdkmanager --licenses >/dev/null || true
+
+          install_pkgs() {
+            sdkmanager \
+              "platforms;android-34" \
+              "build-tools;34.0.0" \
+              "ndk;27.0.12077973" \
+              "cmake;3.22.1"
+          }
+
+          n=0
+          until install_pkgs; do
+            n=$((n+1))
+
+            if [ "$n" -ge 4 ]; then
+              echo "sdkmanager failed after $n attempts"
+              exit 1
+            fi
+
+            echo "SDK install failed (attempt $n); retrying..."
+            rm -rf \
+              "${ANDROID_SDK_ROOT:-$ANDROID_HOME}/ndk/27.0.12077973" \
+              2>/dev/null || true
+            sleep 8
+          done
+
+          test -d \
+            "${ANDROID_SDK_ROOT:-$ANDROID_HOME}/ndk/27.0.12077973" \
+            || {
+              echo "NDK missing after install"
+              exit 1
+            }
+
+      - name: Download nodejs-mobile and place libnode.so
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+
+          URL=$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/digidem/nodejs-mobile/releases?per_page=15" \
+            | grep browser_download_url \
+            | grep -- '-android-' \
+            | grep -v lite \
+            | grep '\.zip' \
+            | head -n1 \
+            | cut -d '"' -f4)
+
+          if [ -z "$URL" ]; then
+            echo "No Android release asset found"
+            exit 1
+          fi
+
+          echo "Downloading $URL"
+          curl -fLsS -o node.zip "$URL"
+
+          mkdir -p _node
+          unzip -q node.zip -d _node
+
+          SO=$(find _node \
+            -path '*arm64-v8a*' \
+            -name 'libnode.so' \
+            -print -quit)
+
+          if [ -z "$SO" ]; then
+            echo "arm64-v8a/libnode.so not found in archive"
+            exit 1
+          fi
+
+          mkdir -p android/app/src/main/jniLibs/arm64-v8a
+          cp "$SO" android/app/src/main/jniLibs/arm64-v8a/libnode.so
+
+          ls -lh android/app/src/main/jniLibs/arm64-v8a/
+
+      - name: Install Node dependencies and bundle project
+        run: |
+          set -e
+
+          cd backend
+          npm ci --omit=dev --no-audit --no-fund
+          cd ..
+
+          mkdir -p android/app/src/main/assets
+
+          (
+            cd backend
+            zip -qr ../android/app/src/main/assets/nodejs-project.zip . \
+              -x '*.git*'
+          )
+
+          ls -lh android/app/src/main/assets/
+          du -sh android/app/src/main/assets/nodejs-project.zip
 
       - name: Install dependencies
         run: flutter pub get
@@ -31,12 +133,12 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      - name: Build debug APK
-        run: flutter build apk --debug
+      - name: Build release APK
+        run: flutter build apk --release --split-per-abi --target-platform android-arm64
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: whats-ayx-debug
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: whats-ayx-release
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           retention-days: 14
