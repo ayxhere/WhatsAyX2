@@ -72,8 +72,6 @@ class SettingsStore {
         aiImageFree: remote.aiImageFree,
         aiCommandsEnabled: remote.aiCommandsEnabled,
         aiVoiceNoteReply: remote.aiVoiceNoteReply,
-        aiTtsVoice: remote.aiTtsVoice,
-        aiSarvamKey: remote.aiSarvamKey,
         aiLangMode: remote.aiLangMode,
         aiFullContext: remote.aiFullContext,
         aiReplyLang: remote.aiReplyLang,
@@ -120,6 +118,8 @@ class SettingsStore {
         'iconStyle': _current.iconStyle,
         'musicProvider': _current.musicProvider,
         'notificationsEnabled': _current.notificationsEnabled,
+        'voiceEngineVoice': _current.voiceEngineVoice,
+        'voiceSpeed': _current.voiceSpeed,
       });
     await prefs.setString(_prefsKey, jsonEncode(map));
   }

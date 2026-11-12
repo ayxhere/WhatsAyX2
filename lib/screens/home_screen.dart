@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'chats_screen.dart';
 import 'settings_screen.dart';
 import 'status_screen.dart';
-import 'tools_screen.dart';
 
 /// Home shell with bottom navigation.
-/// Chats / Status / Tools / Settings. IndexedStack keeps each tab's
+/// Chats / Status / Settings. IndexedStack keeps each tab's
 /// state, so switching tabs is instant and smooth.
+/// (Tools used to be a tab here; Music + Schedule now live in
+/// Settings → Tools. tools_screen.dart is kept but unreferenced.)
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -21,7 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
   static const List<Widget> _tabs = [
     ChatsScreen(),
     StatusScreen(),
-    ToolsScreen(),
     SettingsScreen(),
   ];
 
@@ -45,11 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.circle_outlined),
             activeIcon: Icon(Icons.circle),
             label: 'Status',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.auto_awesome_outlined),
-            activeIcon: Icon(Icons.auto_awesome),
-            label: 'Tools',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),

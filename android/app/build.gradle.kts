@@ -28,6 +28,32 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // Embedded Node (libnode.so) ships arm64-v8a only — the user's
+        // phone is arm64, and the original app is arm64-only too.
+        // Without this, the CMake build would look for a libnode.so
+        // for armeabi-v7a / x86_64 that does not exist and fail.
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
+    }
+
+    // JNI glue for the embedded Node runtime (node_bridge.cpp).
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+
+    androidResources {
+        noCompress += "zip"   // keep assets/nodejs-project.zip STORED, not deflated
+    }
+
+    packaging {
+        // Extract libnode.so to the filesystem (safer for the embedded runtime).
+        jniLibs {
+            useLegacyPackaging = false
+        }
     }
 
     buildTypes {

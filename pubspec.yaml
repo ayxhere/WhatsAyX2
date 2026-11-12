@@ -1,7 +1,7 @@
 name: whats_ayx
 description: "WhatsAyX v2 — a clean WhatsApp tool app (Flutter + Node gateway). Separate app from AyXWhatsapp."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.4.0
@@ -13,6 +13,10 @@ dependencies:
   http: ^1.2.0
   socket_io_client: ^2.0.3
   shared_preferences: ^2.2.2
+  qr_flutter: ^4.1.0
+  path_provider: ^2.1.0
+  sherpa_onnx: ^2.0.1
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:

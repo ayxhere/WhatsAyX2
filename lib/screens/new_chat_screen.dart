@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/fuzzy.dart';
 import '../widgets/ayx_widgets.dart';
 
 /// New chat — contacts from the gateway, or start by number.
@@ -20,6 +23,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
   List<Map<String, dynamic>> _contacts = [];
   String _query = '';
   bool _loading = true;
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -29,10 +33,19 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _api.dispose();
     _numberCtrl.dispose();
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String v) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+      setState(() => _query = v);
+    });
   }
 
   Future<void> _load() async {
@@ -46,12 +59,21 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   List<Map<String, dynamic>> get _filtered {
     if (_query.isEmpty) return _contacts;
+    // WZH-style fuzzy search on name; numbers still match by substring.
     final q = _query.toLowerCase();
-    return _contacts
-        .where((c) =>
-            (c['name']?.toString() ?? '').toLowerCase().contains(q) ||
-            (c['number']?.toString() ?? '').contains(q))
-        .toList();
+    final scored = <({Map<String, dynamic> contact, double score})>[];
+    for (final c in _contacts) {
+      final name = c['name']?.toString() ?? '';
+      final number = c['number']?.toString() ?? '';
+      final s = fuzzyScore(_query, name);
+      if (s > 0 || number.toLowerCase().contains(q)) {
+        scored.add(
+          (contact: c, score: number.toLowerCase().contains(q) ? 1 : s),
+        );
+      }
+    }
+    scored.sort((a, b) => b.score.compareTo(a.score));
+    return scored.map((e) => e.contact).toList();
   }
 
   @override
@@ -69,7 +91,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
             child: AyxSearchBar(
               controller: _searchCtrl,
               hint: 'Search name or number',
-              onChanged: (v) => setState(() => _query = v),
+              onChanged: _onSearchChanged,
             ),
           ),
           Padding(
@@ -108,6 +130,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         ),
                       )
                     : ListView.separated(
+                        cacheExtent: 400,
+                        addAutomaticKeepAlives: false,
+                        addRepaintBoundaries: true,
                         itemCount: contacts.length,
                         separatorBuilder: (_, __) => const Divider(
                           color: AppTheme.border,

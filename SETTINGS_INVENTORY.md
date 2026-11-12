@@ -77,8 +77,8 @@ Accent Color / Blur & Animation under Appearance.
 | 39 | AI Memory — per-contact remembered name/number/language/history, clear per contact / clear all | `GET /aimemory`, `POST /aimemory/clear` | ✓ |
 | 40 | AI Voice — transcribe incoming voice notes then AI-reply | `aiReplyVoice` | ✓ (voice page) |
 | 41 | AI Voice — reply to voice notes WITH a voice note (TTS) | `aiVoiceNoteReply` | ✓ (voice page) |
-| 42 | AI Voice — TTS voice artist (Groq PlayAI voice) | `aiTtsVoice` (default `Arista-PlayAI`) | ✓ (voice page) |
-| 43 | Sarvam AI key (voice) | `aiSarvamKey` | ✓ (voice page) |
+| 42 | AI Voice — on-device TTS voice (Supertonic 3 via sherpa-onnx, ~139 MB download on first use) | `voiceEngineVoice` (default `F1`) | ✓ (voice page) |
+| 43 | AI Voice — TTS speed | `voiceSpeed` (default `1.0`) | ✓ (voice page) |
 
 ## 5. Chat settings (page `chat` + `wallpaper`)
 
@@ -162,7 +162,7 @@ Accent Color / Blur & Animation under Appearance.
 | 94 | Reminders | `Reminder` | ✓ (with Schedule) |
 | 95 | AI tools — AI Reply, AI Rewrite, Translate, Schedule, Broadcast, Auto Reply | Tools tab | ✓ |
 | 96 | AI image tools — /create image, /prompt on image, /voice | `aiCommandsEnabled` | ✓ |
-| 97 | Voice notes — record, send, play, TTS demo | `ExoVideoPlayer`, `GET /ttsdemo /voicecheck` | ✓ (voice page + chat) |
+| 97 | Voice notes — record, send, play, on-device TTS demo (Supertonic 3, sherpa-onnx, wired: download + synthesize + play) | `voice` page + chat | ✓ (voice page + chat) |
 | 98 | Media viewer — photo/video viewer, zoom, swipeable pager | `MediaPagerViewer` | ✓ (status viewer + chat media) |
 | 99 | Notifications — gateway foreground service + reply from notification | `NotificationHelper`, `ReplyReceiver` | ✓ (setting + gateway) |
 | 100 | Crash reporting dialog | `CrashReportDialog` | ✓ (basic) |

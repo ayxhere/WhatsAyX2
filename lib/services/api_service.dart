@@ -16,10 +16,11 @@ import '../models/settings.dart';
 /// When the gateway is unreachable every call fails soft and the UI
 /// falls back to local demo data, so the app always stays usable.
 class ApiService {
-  ApiService({this.baseUrl = 'http://10.0.2.2:3000'});
+  ApiService({this.baseUrl = 'http://127.0.0.1:8765'});
 
-  /// Default is the Android emulator loopback. On a real device the
-  /// user changes this to the machine running the gateway.
+  /// Default is the on-device gateway: the Node gateway runs INSIDE
+  /// the app (embedded Node, started by MainActivity via NodeRuntime)
+  /// and listens on port 8765. No Termux, no separate backend process.
   final String baseUrl;
 
   io.Socket? _socket;

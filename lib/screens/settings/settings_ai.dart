@@ -126,7 +126,7 @@ class _AiSettingsPageState extends State<AiSettingsPage> {
                 icon: Icons.graphic_eq,
                 tint: AppTheme.primary,
                 title: 'AI Voice',
-                desc: 'Voice reply, voice notes & voice artists',
+                desc: 'Voice reply, voice notes & on-device voice',
                 onTap: widget.onOpenVoice,
               ),
             ],
@@ -271,12 +271,12 @@ class _AiSettingsPageState extends State<AiSettingsPage> {
         ),
         settingsGap(),
         SettingsGroup(
-          title: 'API configuration (text/voice)',
+          title: 'API configuration (text)',
           child: Column(
             children: [
               TextField(
                 controller: _apiUrlCtrl,
-                decoration: const InputDecoration(labelText: 'API URL (text/voice)'),
+                decoration: const InputDecoration(labelText: 'API URL (text)'),
               ),
               const SizedBox(height: 10),
               TextField(

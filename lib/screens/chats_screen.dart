@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../models/chat.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/fuzzy.dart';
 import '../widgets/ayx_widgets.dart';
 import 'chat_detail_screen.dart';
 import 'new_chat_screen.dart';
@@ -22,12 +25,22 @@ class _ChatsScreenState extends State<ChatsScreen> {
   String _query = '';
   final Set<String> _hiddenIds = {};
   bool _showHidden = false;
+  Timer? _debounce;
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchCtrl.dispose();
     _api.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String v) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+      setState(() => _query = v);
+    });
   }
 
   List<ChatThread> get _filtered {
@@ -40,12 +53,17 @@ class _ChatsScreenState extends State<ChatsScreen> {
       list = list.where((c) => _hiddenIds.contains(c.id)).toList();
     }
     if (_query.isEmpty) return list;
-    final q = _query.toLowerCase();
-    return list
-        .where((c) =>
-            c.name.toLowerCase().contains(q) ||
-            c.lastMessage.toLowerCase().contains(q))
-        .toList();
+    // WZH-style fuzzy search: Levenshtein ranking on name +
+    // last message, best match first (not substring contains).
+    final scored = <({ChatThread chat, double score})>[];
+    for (final c in list) {
+      final nameScore = fuzzyScore(_query, c.name);
+      final msgScore = fuzzyScore(_query, c.lastMessage);
+      final s = nameScore > msgScore ? nameScore : msgScore;
+      if (s > 0) scored.add((chat: c, score: s));
+    }
+    scored.sort((a, b) => b.score.compareTo(a.score));
+    return scored.map((e) => e.chat).toList();
   }
 
   Future<void> _chatMenu(ChatThread chat) async {
@@ -144,20 +162,6 @@ class _ChatsScreenState extends State<ChatsScreen> {
           },
           child: Text(_showHidden ? 'Hidden chats' : 'WhatsAyX'),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.qr_code_scanner),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/login');
-            },
-            tooltip: 'Link a device',
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-            tooltip: 'More',
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -165,7 +169,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
             child: AyxSearchBar(
               controller: _searchCtrl,
-              onChanged: (v) => setState(() => _query = v),
+              onChanged: _onSearchChanged,
             ),
           ),
           Padding(
@@ -187,6 +191,9 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     ),
                   )
                 : ListView.separated(
+                    cacheExtent: 400,
+                    addAutomaticKeepAlives: false,
+                    addRepaintBoundaries: true,
                     padding: const EdgeInsets.only(bottom: 16),
                     itemCount: chats.length,
                     separatorBuilder: (_, __) =>
@@ -194,6 +201,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     itemBuilder: (context, i) {
                       final chat = chats[i];
                       return _ChatRow(
+                        key: ValueKey(chat.id),
                         chat: chat,
                         onTap: () {
                           Navigator.of(context).push(
@@ -227,6 +235,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
 
 class _ChatRow extends StatelessWidget {
   const _ChatRow({
+    super.key,
     required this.chat,
     required this.onTap,
     required this.onLongPress,

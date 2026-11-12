@@ -148,8 +148,10 @@ class AyxSettings {
   final bool aiImageFree;
   final bool aiCommandsEnabled;
   final bool aiVoiceNoteReply;
-  final String aiTtsVoice;
-  final String aiSarvamKey;
+  /// On-device voice id (Supertonic 3) — local-only, NOT a gateway key.
+  final String voiceEngineVoice;
+  /// On-device voice speed multiplier — local-only.
+  final double voiceSpeed;
   final String aiLangMode; // auto | hinglish | bangla | english | hindi | banglascript | custom
   final bool aiFullContext;
   final String aiReplyLang;
@@ -207,8 +209,8 @@ class AyxSettings {
     this.aiImageFree = true,
     this.aiCommandsEnabled = true,
     this.aiVoiceNoteReply = false,
-    this.aiTtsVoice = 'Arista-PlayAI',
-    this.aiSarvamKey = '',
+    this.voiceEngineVoice = 'F1',
+    this.voiceSpeed = 1.0,
     this.aiLangMode = 'auto',
     this.aiFullContext = true,
     this.aiReplyLang = '',
@@ -265,8 +267,8 @@ class AyxSettings {
     bool? aiImageFree,
     bool? aiCommandsEnabled,
     bool? aiVoiceNoteReply,
-    String? aiTtsVoice,
-    String? aiSarvamKey,
+    String? voiceEngineVoice,
+    double? voiceSpeed,
     String? aiLangMode,
     bool? aiFullContext,
     String? aiReplyLang,
@@ -322,8 +324,8 @@ class AyxSettings {
       aiImageFree: aiImageFree ?? this.aiImageFree,
       aiCommandsEnabled: aiCommandsEnabled ?? this.aiCommandsEnabled,
       aiVoiceNoteReply: aiVoiceNoteReply ?? this.aiVoiceNoteReply,
-      aiTtsVoice: aiTtsVoice ?? this.aiTtsVoice,
-      aiSarvamKey: aiSarvamKey ?? this.aiSarvamKey,
+      voiceEngineVoice: voiceEngineVoice ?? this.voiceEngineVoice,
+      voiceSpeed: voiceSpeed ?? this.voiceSpeed,
       aiLangMode: aiLangMode ?? this.aiLangMode,
       aiFullContext: aiFullContext ?? this.aiFullContext,
       aiReplyLang: aiReplyLang ?? this.aiReplyLang,
@@ -384,12 +386,14 @@ class AyxSettings {
         'aiImageFree': aiImageFree,
         'aiCommandsEnabled': aiCommandsEnabled,
         'aiVoiceNoteReply': aiVoiceNoteReply,
-        'aiTtsVoice': aiTtsVoice,
-        'aiSarvamKey': aiSarvamKey,
         'aiLangMode': aiLangMode,
         'aiFullContext': aiFullContext,
         'aiReplyLang': aiReplyLang,
         'aiLyricsApis': aiLyricsApis.map((a) => a.toJson()).toList(),
+        // Local-only voice fields (not gateway-owned): kept here so
+        // SettingsStore._saveLocal persists them in the local JSON blob.
+        'voiceEngineVoice': voiceEngineVoice,
+        'voiceSpeed': voiceSpeed,
       };
 
   factory AyxSettings.fromJson(Map<String, dynamic> json) {
@@ -448,8 +452,9 @@ class AyxSettings {
       aiImageFree: b('aiImageFree', true),
       aiCommandsEnabled: b('aiCommandsEnabled', true),
       aiVoiceNoteReply: b('aiVoiceNoteReply', false),
-      aiTtsVoice: s('aiTtsVoice', 'Arista-PlayAI'),
-      aiSarvamKey: s('aiSarvamKey', ''),
+      voiceEngineVoice:
+          AyxOptions.supertonicVoiceOrDefault(s('voiceEngineVoice', 'F1')),
+      voiceSpeed: (json['voiceSpeed'] as num?)?.toDouble() ?? 1.0,
       aiLangMode: s('aiLangMode', 'auto'),
       aiFullContext: b('aiFullContext', true),
       aiReplyLang: s('aiReplyLang', ''),
@@ -618,21 +623,41 @@ class AyxOptions {
     'OpenMoji',
   ];
 
-  /// Groq PlayAI TTS voices (original aiTtsVoice; default Arista-PlayAI).
-  static const List<String> ttsVoices = [
-    'Arista-PlayAI',
-    'Atlas-PlayAI',
-    'Aria-PlayAI',
-    'Ceres-PlayAI',
-    'Deedee-PlayAI',
-    'Fritz-PlayAI',
-    'Gail-PlayAI',
-    'Judy-PlayAI',
-    'Mitch-PlayAI',
-    'Quinn-PlayAI',
-    'Ruby-PlayAI',
-    'Theo-PlayAI',
+  /// Supertonic 3 on-device voices (voiceEngineVoice; default F1).
+  /// Hindi voices: write Hindi in Devanagari, not Roman — Roman Hindi
+  /// sounds wrong. The 10 styles live in voice.bin; sid 0–4 = F1–F5
+  /// (female), sid 5–9 = M1–M5 (male). One model speaks all 31
+  /// languages, so every voice works for Hindi and English.
+  static const List<String> supertonicVoices = [
+    'F1',
+    'F2',
+    'F3',
+    'F4',
+    'F5',
+    'M1',
+    'M2',
+    'M3',
+    'M4',
+    'M5',
   ];
+  static const Map<String, String> supertonicVoiceLabels = {
+    'F1': 'F1 — Female (soft)',
+    'F2': 'F2 — Female',
+    'F3': 'F3 — Female',
+    'F4': 'F4 — Female',
+    'F5': 'F5 — Female',
+    'M1': 'M1 — Male',
+    'M2': 'M2 — Male',
+    'M3': 'M3 — Male',
+    'M4': 'M4 — Male',
+    'M5': 'M5 — Male',
+  };
+
+  /// A stored voice id from an older engine (e.g. Kokoro's hf_alpha)
+  /// is not a Supertonic voice — fall back to the F1 default instead
+  /// of showing an unknown value in the picker.
+  static String supertonicVoiceOrDefault(String v) =>
+      supertonicVoices.contains(v) ? v : 'F1';
 
   static const List<String> musicProviders = ['saavn', 'itunes', 'spotify'];
   static const Map<String, String> musicProviderLabels = {

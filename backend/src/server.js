@@ -91,8 +91,6 @@ const DEFAULT_SETTINGS = {
   aiImageFree: true,
   aiCommandsEnabled: true,
   aiVoiceNoteReply: false,
-  aiTtsVoice: 'Arista-PlayAI',
-  aiSarvamKey: '',
   aiLangMode: 'auto',
   aiFullContext: true,
   aiReplyLang: '',
