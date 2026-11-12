@@ -111,6 +111,17 @@ jobs:
           mkdir -p android/app/src/main/jniLibs/arm64-v8a
           cp "$SO" android/app/src/main/jniLibs/arm64-v8a/libnode.so
 
+          # libnode.so links against libc++_shared.so (shared C++ STL). The APK
+          # must package it or NodeBridge crashes on launch with
+          # UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so"
+          # not found (seen 2026-11-12, v1.1.0+2 on Nothing Phone). Gradle
+          # packages everything in jniLibs/<abi>/, so copy the NDK's STL lib
+          # next to libnode.so.
+          NDK_DIR="${ANDROID_SDK_ROOT:-$ANDROID_HOME}/ndk/27.0.12077973"
+          STL="$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so"
+          test -f "$STL" || { echo "libc++_shared.so not found in NDK"; exit 1; }
+          cp "$STL" android/app/src/main/jniLibs/arm64-v8a/libc++_shared.so
+
           ls -lh android/app/src/main/jniLibs/arm64-v8a/
 
       - name: Install Node dependencies and bundle project
