@@ -89,7 +89,7 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: isLight
-            ? const Color(0xFFED EFF2)
+            ? const Color(0xFFEDEFF2)
             : surfaceVariant,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
