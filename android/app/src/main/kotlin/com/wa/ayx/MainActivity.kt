@@ -12,15 +12,20 @@ class MainActivity : FlutterActivity() {
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
-        // Start the on-device Node gateway early, off the UI thread
-        // (extraction does blocking IO on first run / after an update).
-        Thread {
-            try {
-                NodeRuntime.ensureStarted(applicationContext)
-            } catch (e: Exception) {
-                android.util.Log.w("MainActivity", "gateway autostart failed: ${e.message}")
-            }
-        }.start()
+        // DIAGNOSTIC (2026-11-12): Node autostart DISABLED — the v1.1.0+2
+        // build (run #24, libc++ fix in) still dies on launch with NO Java
+        // crash log, i.e. a NATIVE crash inside node::Start. Turning the
+        // launch-time autostart off isolates it: if the app now opens,
+        // Node startup is the killer and the gateway starts lazily from
+        // the login screen ("startGateway" channel) instead. Re-enable
+        // once the native crash cause is fixed.
+        // Thread {
+        //     try {
+        //         NodeRuntime.ensureStarted(applicationContext)
+        //     } catch (e: Exception) {
+        //         android.util.Log.w("MainActivity", "gateway autostart failed: ${e.message}")
+        //     }
+        // }.start()
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
