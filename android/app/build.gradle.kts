@@ -28,13 +28,12 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        // Embedded Node (libnode.so) ships arm64-v8a only — the user's
-        // phone is arm64, and the original app is arm64-only too.
-        // Without this, the CMake build would look for a libnode.so
-        // for armeabi-v7a / x86_64 that does not exist and fail.
-        ndk {
-            abiFilters += "arm64-v8a"
-        }
+        // NOTE: do NOT add ndk { abiFilters } here — the workflow builds
+        // with `--split-per-abi --target-platform android-arm64`, which
+        // already restricts the build to arm64-v8a, and Gradle FAILS
+        // ("Conflicting configuration") if abiFilters and splits abi
+        // filters are both set (run #22). libnode.so ships arm64-only,
+        // and --target-platform keeps CMake from looking for other ABIs.
     }
 
     // JNI glue for the embedded Node runtime (node_bridge.cpp).
