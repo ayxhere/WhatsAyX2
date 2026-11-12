@@ -9,15 +9,24 @@ plugins {
 // KEY_ALIAS, KEY_PASSWORD) or from keystore.properties (local).
 // Falls back to debug signing when no keystore is configured, so
 // local/CI builds never break on a missing keystore.
-// NOTE: this MUST stay at the top level, outside `android { }` —
-// inside that block `java.util.Properties()` does not resolve
-// (run #44: "Unresolved reference: util").
-val keystoreProps = java.util.Properties().apply {
+// NOTE: do NOT use java.util.Properties here — `java` is shadowed in
+// this script and `java.util.Properties()` fails to compile
+// (runs #44/#45: "Unresolved reference: util"). The properties file
+// is parsed manually instead.
+val keystoreProps = mutableMapOf<String, String>().apply {
     val f = rootProject.file("keystore.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
+    if (f.exists()) {
+        f.readLines().forEach { line ->
+            val t = line.trim()
+            if (t.isNotEmpty() && !t.startsWith("#") && "=" in t) {
+                val (k, v) = t.split("=", limit = 2)
+                put(k.trim(), v.trim())
+            }
+        }
+    }
 }
 fun keystoreProp(name: String): String? =
-    System.getenv(name) ?: keystoreProps.getProperty(name)
+    System.getenv(name) ?: keystoreProps[name]
 val ksFile = keystoreProp("KEYSTORE_FILE")?.let { file(it) }
     ?: keystoreProp("KEYSTORE_PATH")?.let { file(it) }
 val ksPass = keystoreProp("KEYSTORE_PASSWORD")
