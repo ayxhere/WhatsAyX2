@@ -33,6 +33,11 @@ jobs:
       - name: Install NDK + CMake
         run: |
           set -e
+          # sdkmanager is NOT on PATH on GitHub runners; it lives under
+          # $ANDROID_SDK_ROOT/cmdline-tools/latest/bin (run #16 failed:
+          # "sdkmanager: command not found"). Put it on PATH first.
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          command -v sdkmanager || { echo "sdkmanager still not found"; exit 1; }
           yes | sdkmanager --licenses >/dev/null || true
 
           install_pkgs() {
