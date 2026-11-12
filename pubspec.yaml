@@ -16,7 +16,7 @@ dependencies:
   qr_flutter: ^4.1.0
   path_provider: ^2.1.0
   sherpa_onnx: ^2.0.1
-  audioplayers: ^6.8.1
+  audioplayers: ^6.4.0 # 6.5.0+ needs Dart ^3.6.0; workflow Flutter 3.24.5 ships Dart 3.5.4 (run #19 failed on 6.8.1). 6.4.0 has DeviceFileSource + play/stop used by voice_service.dart.
 
 dev_dependencies:
   flutter_test:
