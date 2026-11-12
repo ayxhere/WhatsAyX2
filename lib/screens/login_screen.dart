@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../services/api_service.dart';
+import '../services/gateway_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ayx_widgets.dart';
 
@@ -36,10 +37,22 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    // Start the on-device Node gateway LAZILY, after the Flutter UI is
+    // up (starting it in MainActivity.onCreate crashed the process with
+    // a native SIGABRT and no Java log). GatewayService.ensureStarted()
+    // calls the native startGateway channel, then we poll /health.
+    _startGateway();
     _checkGateway();
     _fetchQr();
     _qrTimer = Timer.periodic(const Duration(seconds: 3), (_) => _fetchQr());
     _meTimer = Timer.periodic(const Duration(seconds: 3), (_) => _checkMe());
+  }
+
+  Future<void> _startGateway() async {
+    final ok = await GatewayService().waitForHealth();
+    if (!mounted) return;
+    setState(() => _gatewayOk = ok);
+    if (ok) _fetchQr();
   }
 
   @override

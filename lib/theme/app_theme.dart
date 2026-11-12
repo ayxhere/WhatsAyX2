@@ -17,53 +17,91 @@ class AppTheme {
   static const double radiusCard = 20;
   static const double radiusField = 14;
 
-  static ThemeData dark() {
-    const colorScheme = ColorScheme.dark(
-      primary: primary,
-      secondary: secondary,
-      surface: surface,
-      onPrimary: Colors.black,
-      onSecondary: Colors.black,
-      onSurface: text,
-    );
+  /// Build the app ThemeData from the user's settings.
+  ///
+  /// [accent] is the accent color value (e.g. 0xFF4DD0C4 for teal).
+  /// [mode] is 'system' | 'light' | 'amoled'. 'system' follows the
+  /// current dark palette, 'light' is a light theme, 'amoled' is pure
+  /// black. Changing either rebuilds the whole app (MaterialApp is
+  /// rebuilt from the SettingsStore listener in main.dart), so the
+  /// theme and accent apply instantly across the whole app.
+  static ThemeData dark({int? accent, String? mode}) {
+    final accentColor =
+        accent != null ? Color(accent) : primary;
+    final isLight = mode == 'light';
+    final isAmoled = mode == 'amoled';
+    final bgColor = isLight
+        ? const Color(0xFFF5F6F8)
+        : isAmoled
+            ? Colors.black
+            : bg;
+    final surfaceColor = isLight
+        ? Colors.white
+        : isAmoled
+            ? const Color(0xFF0A0A0A)
+            : surface;
+    final textColor = isLight ? const Color(0xFF1A1D24) : text;
+    final textSecColor =
+        isLight ? const Color(0xFF5A6474) : textSecondary;
+    final borderColor =
+        isLight ? const Color(0xFFE0E3E8) : border;
+    final scheme = isLight
+        ? ColorScheme.light(
+            primary: accentColor,
+            secondary: secondary,
+            surface: surfaceColor,
+            onPrimary: Colors.white,
+            onSecondary: Colors.white,
+            onSurface: textColor,
+          )
+        : ColorScheme.dark(
+            primary: accentColor,
+            secondary: secondary,
+            surface: surfaceColor,
+            onPrimary: Colors.black,
+            onSecondary: Colors.black,
+            onSurface: textColor,
+          );
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: colorScheme,
-      scaffoldBackgroundColor: bg,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: bg,
+      brightness: isLight ? Brightness.light : Brightness.dark,
+      colorScheme: scheme,
+      scaffoldBackgroundColor: bgColor,
+      appBarTheme: AppBarTheme(
+        backgroundColor: bgColor,
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          color: text,
+          color: textColor,
           fontSize: 22,
           fontWeight: FontWeight.w700,
         ),
-        iconTheme: IconThemeData(color: text),
+        iconTheme: IconThemeData(color: textColor),
       ),
       cardTheme: CardTheme(
-        color: surface,
+        color: surfaceColor,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusCard),
-          side: const BorderSide(color: border, width: 1),
+          side: BorderSide(color: borderColor, width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfaceVariant,
+        fillColor: isLight
+            ? const Color(0xFFED EFF2)
+            : surfaceVariant,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusField),
           borderSide: BorderSide.none,
         ),
-        hintStyle: const TextStyle(color: textSecondary),
+        hintStyle: TextStyle(color: textSecColor),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primary,
+          backgroundColor: accentColor,
           foregroundColor: Colors.black,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -76,32 +114,32 @@ class AppTheme {
           ),
         ),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: surface,
-        selectedItemColor: primary,
-        unselectedItemColor: textSecondary,
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: surfaceColor,
+        selectedItemColor: accentColor,
+        unselectedItemColor: textSecColor,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         headlineMedium: TextStyle(
-          color: text,
+          color: textColor,
           fontSize: 26,
           fontWeight: FontWeight.w800,
         ),
         titleLarge: TextStyle(
-          color: text,
+          color: textColor,
           fontSize: 20,
           fontWeight: FontWeight.w700,
         ),
         titleMedium: TextStyle(
-          color: text,
+          color: textColor,
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
-        bodyMedium: TextStyle(color: text, fontSize: 15),
-        bodySmall: TextStyle(color: textSecondary, fontSize: 13),
+        bodyMedium: TextStyle(color: textColor, fontSize: 15),
+        bodySmall: TextStyle(color: textSecColor, fontSize: 13),
       ),
     );
   }

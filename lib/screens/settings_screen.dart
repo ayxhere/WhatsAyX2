@@ -42,7 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _api = ApiService();
-    _store = SettingsStore(api: _api);
+    _store = SettingsStore.shared;
     _store.addListener((_) {
       if (mounted) setState(() {});
     });

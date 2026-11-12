@@ -13,6 +13,14 @@ class SettingsStore {
 
   final ApiService api;
 
+  /// App-wide shared store — ONE source of truth. main.dart loads it
+  /// and rebuilds MaterialApp when it changes (so theme + accent apply
+  /// instantly); SettingsScreen and MusicScreen use this instance too
+  /// instead of creating their own.
+  static SettingsStore? _shared;
+  static SettingsStore get shared =>
+      _shared ??= SettingsStore(api: ApiService());
+
   static const String _prefsKey = 'ayx_settings_v2';
 
   AyxSettings _current = const AyxSettings();

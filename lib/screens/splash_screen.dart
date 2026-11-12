@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
-/// Smooth splash (original-app style): gold AX logo springs in over a
-/// soft pulsing radial glow, the name fades in staggered behind it,
-/// three dots pulse below — then hands off to Login (~1900ms).
-/// Lightweight: scale/alpha GPU transforms only, no gateway work here
-/// (the login screen handles the gateway).
+/// WZH-style minimal splash: just the gold AX logo + name, clean fade,
+/// one subtle loading row — no glow, no tagline. Hands off to Login
+/// (~1500ms). Lightweight: scale/alpha GPU transforms only, no gateway
+/// work here (the login screen handles the gateway).
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -19,13 +18,10 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   late final AnimationController _ctrl;
-  late final AnimationController _glowCtrl;
   late final AnimationController _dotsCtrl;
   late final Animation<double> _scale;
   late final Animation<double> _logoFade;
   late final Animation<double> _nameFade;
-  late final Animation<double> _tagFade;
-  late final Animation<double> _glow;
   Timer? _handoff;
 
   @override
@@ -33,46 +29,33 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: const Duration(milliseconds: 900),
     );
-    _scale = Tween<double>(begin: 0.82, end: 1.0).animate(
+    _scale = Tween<double>(begin: 0.9, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: const Interval(0.0, 0.64, curve: Curves.easeOutBack),
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
       ),
     );
     _logoFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
+        curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
       ),
     );
-    // Name fades in ~180ms after the logo starts.
+    // Name fades in ~150ms after the logo starts.
     _nameFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: const Interval(0.16, 0.62, curve: Curves.easeOut),
+        curve: const Interval(0.15, 0.55, curve: Curves.easeOut),
       ),
-    );
-    _tagFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _ctrl,
-        curve: const Interval(0.3, 0.75, curve: Curves.easeOut),
-      ),
-    );
-    _glowCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1100),
-    )..repeat(reverse: true);
-    _glow = Tween<double>(begin: 0.30, end: 0.85).animate(
-      CurvedAnimation(parent: _glowCtrl, curve: Curves.easeInOut),
     );
     _dotsCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat();
     _ctrl.forward();
-    _handoff = Timer(const Duration(milliseconds: 1900), () {
+    _handoff = Timer(const Duration(milliseconds: 1500), () {
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/login');
     });
@@ -82,7 +65,6 @@ class _SplashScreenState extends State<SplashScreen>
   void dispose() {
     _handoff?.cancel();
     _ctrl.dispose();
-    _glowCtrl.dispose();
     _dotsCtrl.dispose();
     super.dispose();
   }
@@ -96,68 +78,37 @@ class _SplashScreenState extends State<SplashScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedBuilder(
-              animation: Listenable.merge([_ctrl, _glowCtrl]),
+              animation: _ctrl,
               builder: (context, child) {
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Opacity(
-                      opacity: _glow.value,
-                      child: Container(
-                        width: 230,
-                        height: 230,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              AppTheme.primary.withOpacity(0.35),
-                              const Color(0xFFFFC24D).withOpacity(0.12),
-                              Colors.transparent,
-                            ],
-                            stops: const [0.0, 0.55, 1.0],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Transform.scale(
-                      scale: _scale.value,
-                      child: Opacity(opacity: _logoFade.value, child: child),
-                    ),
-                  ],
+                return Transform.scale(
+                  scale: _scale.value,
+                  child: Opacity(opacity: _logoFade.value, child: child),
                 );
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(28),
                 child: Image.asset(
                   'assets/icon/ayx-logo.png',
-                  width: 128,
-                  height: 128,
+                  width: 112,
+                  height: 112,
                   fit: BoxFit.cover,
                 ),
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 24),
             FadeTransition(
               opacity: _nameFade,
               child: const Text(
                 'WhatsAyX',
                 style: TextStyle(
                   color: AppTheme.text,
-                  fontSize: 32,
+                  fontSize: 30,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
                 ),
               ),
             ),
-            const SizedBox(height: 8),
-            FadeTransition(
-              opacity: _tagFade,
-              child: const Text(
-                'WhatsApp, clean and simple.',
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 15),
-              ),
-            ),
-            const SizedBox(height: 48),
+            const SizedBox(height: 40),
             AnimatedBuilder(
               animation: _dotsCtrl,
               builder: (context, _) {

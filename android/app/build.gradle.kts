@@ -55,9 +55,41 @@ android {
         }
     }
 
+    // Release signing (keystore "imayx", 2026-11-12): reads from env vars
+    // (CI: KEYSTORE_BASE64 decoded to a file, KEYSTORE_PASSWORD,
+    // KEY_ALIAS, KEY_PASSWORD) or from keystore.properties (local).
+    // Falls back to debug signing when no keystore is configured, so
+    // local/CI builds never break on a missing keystore.
+    val keystoreProps = java.util.Properties().apply {
+        val f = rootProject.file("keystore.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
+    fun keystoreProp(name: String): String? =
+        System.getenv(name) ?: keystoreProps.getProperty(name)
+    val ksFile = keystoreProp("KEYSTORE_FILE")?.let { file(it) }
+        ?: keystoreProp("KEYSTORE_PATH")?.let { file(it) }
+    val ksPass = keystoreProp("KEYSTORE_PASSWORD")
+    val ksAlias = keystoreProp("KEY_ALIAS") ?: "imayx"
+    val keyPass = keystoreProp("KEY_PASSWORD") ?: ksPass
+
+    signingConfigs {
+        create("release") {
+            if (ksFile != null && ksFile.exists() && ksPass != null) {
+                storeFile = ksFile
+                storePassword = ksPass
+                keyAlias = ksAlias
+                keyPassword = keyPass
+            }
+        }
+    }
+
     buildTypes {
         getByName("release") {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (ksFile != null && ksFile.exists() && ksPass != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }

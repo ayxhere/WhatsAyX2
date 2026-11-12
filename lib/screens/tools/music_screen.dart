@@ -28,7 +28,7 @@ class _MusicScreenState extends State<MusicScreen> {
   @override
   void initState() {
     super.initState();
-    _store = SettingsStore(api: _api);
+    _store = SettingsStore.shared;
     _store.addListener((_) {
       if (mounted) setState(() {});
     });
