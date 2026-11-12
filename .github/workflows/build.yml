@@ -149,7 +149,25 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
+      - name: Decode release keystore (imayx)
+        # Keystore "imayx" lives in GitHub Secrets (KEYSTORE_BASE64); the
+        # password/alias live in KEYSTORE_PASSWORD / KEY_ALIAS /
+        # KEY_PASSWORD. Skipped (debug signing) when the secret is absent.
+        run: |
+          set -e
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/imayx-release.keystore
+            echo "keystore decoded: $(stat -c%s android/imayx-release.keystore) bytes"
+          else
+            echo "KEYSTORE_BASE64 not set — release will fall back to debug signing"
+          fi
+
       - name: Build release APK
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/android/imayx-release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: flutter build apk --release --split-per-abi --target-platform android-arm64
 
       - name: Upload APK
